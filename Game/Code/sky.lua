@@ -27,6 +27,29 @@ sky.colors[21] = rgb(50, 0, 50)   -- Late night
 sky.colors[22] = rgb(15, 0, 15)     -- Deep night   
 sky.colors[23] = rgb(0, 0, 0)      -- Midnight
 
+function loadTransparent(imagePath, transR, transG, transB)
+	imageData = love.image.newImageData( imagePath )
+	function mapFunction(x, y, r, g, b, a)
+		if r == transR and g == transG and b == transB then a = 0 end
+		return r,g,b,a
+	end
+	imageData:mapPixel( mapFunction )
+	return love.graphics.newImage( imageData )
+end
+
+
+-- Landscape image
+do
+    imgdata = love.image.newImageData("Game/Assets/landscape.png")
+    local function map(x,y,r,g,b,a)
+        return r,r,r,1-r
+    end
+    imgdata:mapPixel(map)
+    sky.landscape = love.graphics.newImage(imgdata)
+end
+
+sky.mask = love.image.newImageData("Game/Assets/skymask.png")
+
 local HOUR = 3600
 
 -- Star: {position, glow}
@@ -110,19 +133,30 @@ local function drawStars(strength)
         local rotatedX = origin.x + distance * math.cos(rotatedAngle)
         local rotatedY = origin.y + distance * math.sin(rotatedAngle)
 
-        -- Render glow if any
-        if glow > 1 then
-            love.graphics.setColor(1, 1, 1, 0.1)
-            local g = glow
-            while g >= 0 do
-                love.graphics.circle("fill", rotatedX, rotatedY, g * strength)
-                g = g - 1
+        local valid = true
+        if (rotatedX < 0 or rotatedX > ScreenX()) then valid = false end
+        if (rotatedY < 0 or rotatedY > ScreenY()) then valid = false end
+        
+        if valid then
+
+            local r,g,b,a = sky.mask:getPixel(rotatedX, rotatedY)
+
+            if (r > 0.5) then
+                -- Render glow if any
+                if glow > 1 then
+                    love.graphics.setColor(1, 1, 1, 0.1)
+                    local g = glow
+                    while g >= 0 do
+                        love.graphics.circle("fill", rotatedX, rotatedY, g * strength)
+                        g = g - 1
+                    end
+                end
+
+                -- Draw the star at the new rotated position
+                love.graphics.setColor(1, 1, 1, (glow / 10) * strength)
+                love.graphics.points({ rotatedX, rotatedY })
             end
         end
-
-        -- Draw the star at the new rotated position
-        love.graphics.setColor(1, 1, 1, (glow / 10) * strength)
-        love.graphics.points({ rotatedX, rotatedY })
     end
 
     love.graphics.setColor(1, 1, 1, 1)
@@ -151,6 +185,7 @@ local function getStarStrength()
 end
 
 hooks.Add("OnGameDraw", function()
+    love.graphics.draw(sky.landscape)
     drawSky()
     local s = getStarStrength()
     drawStars(s)
