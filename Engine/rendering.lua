@@ -92,51 +92,6 @@ hooks.Add("OnGameUpdate", function(deltaTime)
 	
 end)
 
-
-hooks.Add("OnGameDraw", function ()
-	-- Draw game world.
-	local min = utils.CamToWorld(0,0)
-	min.x = min.x - engine.world.grid.tilesize
-	min.y = min.y - engine.world.grid.tilesize
-	local max = utils.CamToWorld(ScreenX(), ScreenY())
-
-	local gmin = engine.world.grid.FromWorldPos(min.x, min.y)
-	local gmax = engine.world.grid.FromWorldPos(max.x, max.y)
-
-
-	hooks.Fire("PreDrawWorld")
-	for x=gmin.x+1, gmax.x do 
-		for y=gmin.y+1, gmax.y do
-			local tile = engine.world.tiles[x] and engine.world.tiles[x][y] or nil
-			if (IsValid(tile)) then
-				local tileSize = engine.world.grid.tilesize
-				love.graphics.setColor(0.2, 0.2, 0.2)
-				love.graphics.rectangle("line", x * tileSize,y * tileSize, tileSize, tileSize)
-				love.graphics.setColor(1,1,1,1)
-			end
-		end
-	end
-
-	hooks.Fire("PreDrawEntities")
-
-	-- Draw entities with their layer.
-	for i=0,3 do -- 3 layers for now.
-		for k, ent in ipairs(engine.world.entities) do
-			local layer = ent.layer or 1
-			if (ent.x > min.x and ent.x < max.x and ent.y > min.y and ent.y < max.y) then
-				if (ent.OnDraw ~= nil and isfunction(ent.OnDraw) and layer == i) then
-					love.graphics.setColor(1,1,1,1)
-					ent:OnDraw()
-					love.graphics.setColor(1,1,1,1)
-				end
-			end
-		end
-	end
-
-	hooks.Fire("PostDrawEntities")
-end)
-
-
 hooks.Add("OnInterfaceDraw", function()
 	if (engine.GetCVar("debug_rendering", false) == false) then return end
 	local zoom = engine.rendering.GetZoom()
