@@ -178,7 +178,7 @@ hooks.Add("OnGameUpdate", function(deltaTime)
     end
 end)
 
-hooks.Add("OnGameDraw", function()
+hooks.Add("PostGameDraw", function()
     -- Display the clock (example formatting)
     local text = string.format(
         "Years: %d, Months: %d, Days: %d, Hours: %d, Minutes: %d, Seconds: %d\nLeap Year?: %s\nMonth length: %s",
@@ -191,5 +191,7 @@ hooks.Add("OnGameDraw", function()
         isLeapYear(game.clock.years) == true and "True" or "False",
         getCurrentMonthLength())
 
-    love.graphics.print(text, ScreenX() / 2, ScreenY() / 2)
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.setBlendMode("alpha")
+    love.graphics.print(text, ScreenX() / 2, ScreenY()-64)
 end)

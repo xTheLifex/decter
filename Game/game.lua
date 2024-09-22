@@ -3,6 +3,7 @@ game.time = 0
 
 require("Game.Code.clock")
 require("Game.Code.sky")
+require("Game.Code.terrain")
 
 hooks.Add("OnGameLoad", function ()
     game.clock.years = 2025
@@ -12,9 +13,11 @@ hooks.Add("OnGameLoad", function ()
 end)
 
 hooks.Add("OnGameDraw", function()
-
+    hooks.Fire("OnDrawSky")
+    hooks.Fire("OnDrawTerrain")
 end)
 
 hooks.Add("OnGameUpdate", function()
 
 end)
+

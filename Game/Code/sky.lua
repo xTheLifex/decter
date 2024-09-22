@@ -27,17 +27,6 @@ sky.colors[21] = rgb(50, 0, 50)   -- Late night
 sky.colors[22] = rgb(15, 0, 15)     -- Deep night   
 sky.colors[23] = rgb(0, 0, 0)      -- Midnight
 
-function loadTransparent(imagePath, transR, transG, transB)
-	imageData = love.image.newImageData( imagePath )
-	function mapFunction(x, y, r, g, b, a)
-		if r == transR and g == transG and b == transB then a = 0 end
-		return r,g,b,a
-	end
-	imageData:mapPixel( mapFunction )
-	return love.graphics.newImage( imageData )
-end
-
-
 -- Landscape image
 do
     imgdata = love.image.newImageData("Game/Assets/landscape.png")
@@ -97,6 +86,7 @@ local function drawSky()
     )
 
     love.graphics.setBackgroundColor(blended.r,blended.g,blended.b)
+    sky.lastColor = blended
 end
 
 
@@ -160,6 +150,7 @@ local function drawStars(strength)
     end
 
     love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.setBlendMode("alpha")
     love.graphics.print(string.format("Stars: [%s]", #sky.stars), 8, ScreenY() - 128)
 end
 
@@ -184,11 +175,22 @@ local function getStarStrength()
     return 0
 end
 
-hooks.Add("OnGameDraw", function()
+hooks.Add("OnDrawSky", function()
     love.graphics.draw(sky.landscape)
     drawSky()
     local s = getStarStrength()
     drawStars(s)
     love.graphics.setColor(1,1,1,1)
+    love.graphics.setBlendMode("alpha")
     love.graphics.print(string.format("Sky Strength: [%s]", s), 8, ScreenY() - 164)
+end)
+
+fog = false
+hooks.Add("PostGameDraw", function()
+    if fog then
+        -- "Post processing"
+        local c = sky.lastColor
+        love.graphics.setColor(c.r,c.g,c.b, 0.55)
+        love.graphics.rectangle("fill", 0, 0, ScreenX(), ScreenY())
+    end
 end)

@@ -29,7 +29,7 @@ end
 local ignoreUnuse = {
 	"OnEngineShutdown", "EngineLoadingScreenDraw",
 	"OnMouseWheelUp", "OnMouseWheelDown",
-	"OnKeyPressed"
+	"OnKeyPressed", "OnScreenResize"
 }
 
 for _,h in ipairs(ignoreUnuse) do hooks.Flag(h, "ignoreUnused", true) end

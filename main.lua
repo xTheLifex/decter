@@ -30,6 +30,8 @@ function love.load()
 	engine.Log("[Core] Loaded routines module.")
 	require("Engine/interface")
 	engine.Log("[Core] Loaded interface module.")
+	require("Engine/rendering")
+	engine.Log("[Core] Loaded rendering module.")
 	require("Engine/misc")
 	engine.Log("[Core] Loaded misc engine features.")
 
@@ -47,11 +49,11 @@ function love.load()
 
 	-- ---------------------------------- Setup --------------------------------- --
 	engine.Log("[Core] Final engine setup...")
-	hooks.Fire("OnEngineSetup")
 	-- ------------------------------ Game Loading ------------------------------ --
 	-- This was made async for loading screens.
 	engine.loading = true
 	engine.routines.New("EngineLoad", function ()
+		hooks.Fire("OnEngineSetup")
 		engine.Log("[Core] Engine loaded!")
 		hooks.Fire("PostEngineLoad")
 		engine.quitReady = true
@@ -74,22 +76,27 @@ end
 -- -------------------------------------------------------------------------- --
 
 function love.keypressed(key, scancode, isrepeat)
+	if engine.loading then return end
 	hooks.Fire("OnKeyPressed", key, scancode, isrepeat)
 end
 
 function love.keyreleased(key, scancode, isrepeat)
+	if engine.loading then return end
 	hooks.Fire("OnKeyReleased", key, scancode, isrepeat)	
 end
 
 function love.textinput(text)
+	if engine.loading then return end
 	hooks.Fire("OnTextInput", text)
 end
 
 function love.mousepressed(x, y, button)
+	if engine.loading then return end
 	hooks.Fire("OnMousePress", x, y, button)
 end
 
 function love.mousereleased(x, y, button)
+	if engine.loading then return end
 	hooks.Fire("OnMouseRelease", x, y, button)
 end
 
@@ -106,6 +113,7 @@ function love.update(deltaTime)
 end
 
 function love.wheelmoved(x, y)
+	if engine.loading then return end
 	hooks.Fire("OnMouseWheel", x, y)
     if y > 0 then
         -- mouse wheel moved up
@@ -116,14 +124,19 @@ function love.wheelmoved(x, y)
     end
 end
 
+function love.resize(w,h)
+	hooks.Fire("OnScreenResize", w,h)
+end
+
 -- -------------------------------------------------------------------------- --
 --                                   Drawing                                  --
 -- -------------------------------------------------------------------------- --
 
 function love.draw()
-	hooks.Fire("PreDraw")
+	if engine.loading == true then hooks.Fire("EngineLoadingScreenDraw") return end
 
-	if engine.loading == true then hooks.Fire("EngineLoadingScreenDraw") end
+
+	hooks.Fire("PreDraw")
 	
 	hooks.Fire("OnCameraAttach")
 	hooks.Fire("PreGameDraw")
@@ -141,8 +154,11 @@ function love.draw()
 	
 	hooks.Fire("PostDraw")
 
-	love.graphics.setColor(1,1,1)
-	love.graphics.print("Development Preview - Not final. Version: " .. engine.version .. " [dev]", 0, ScreenY()-love.graphics.getFont():getHeight())
+	love.graphics.setBlendMode('alpha')
+	love.graphics.setLineStyle('rough')
+	love.graphics.setDefaultFilter("nearest", "nearest")
+	love.graphics.setColor(1,1,1,1)
+	love.graphics.print("Decter - Spartan Team - Rex Engine", 0, ScreenY()-love.graphics.getFont():getHeight())
 end
 
 -- -------------------------------------------------------------------------- --

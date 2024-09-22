@@ -33,14 +33,15 @@ hooks.Add("EngineLoadingScreenDraw", function ()
     engine.interface.print(text, ScreenX()/2, ScreenY()/2)
 end)
 
-hooks.Add("OnCVarSet", function (key, value)
-    screen_vars = {"screen_borderless", "screen_x", "screen_y"}
-    if (table.contains(screen_vars, key)) then
-        local x = engine.GetCVar("screen_x", 1280)
-        local y = engine.GetCVar("screen_y", 720)
-        local fullscreen = engine.GetCVar("fullscreen", false)
-        local borderless = engine.GetCVar("screen_borderless", false)
-        love.window.setMode(x or 1280, y or 720, {resizable=true, fullscreen=fullscreen or false, centered=true, borderless=borderless or false, msaa=1})
-    end
+hooks.Add("OnEngineSetup", function ()
+    local x = engine.GetCVar("screen_x", 1280)
+    local y = engine.GetCVar("screen_y", 720)
+    local fullscreen = engine.GetCVar("fullscreen", false)
+    local borderless = engine.GetCVar("screen_borderless", false)
+    love.window.setMode(x or 1280, y or 720, {resizable=false, fullscreen=fullscreen or false, borderless=borderless or false, msaa=1})
 end)
 
+hooks.Add("OnScreenResize", function (w,h)
+    engine.SetCVar("screen_x", w)
+    engine.SetCVar("screen_y", h)
+end)
