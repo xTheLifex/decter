@@ -4,6 +4,7 @@ game.time = 0
 require("Game.Code.clock")
 require("Game.Code.sky")
 require("Game.Code.terrain")
+require("Game.Code.simulation")
 
 hooks.Add("OnGameLoad", function ()
     game.clock.years = 2025

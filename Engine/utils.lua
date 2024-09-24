@@ -363,7 +363,20 @@ function utils.Color(red, green, blue)
 
 	return {r,g,b, ["r"] = r, ["g"] = g, ["b"] = b}
 end
+
+function utils.ColorMix(a,b, percent)
+	local percent = percent and math.clamp(percent, 0, 1) or 0.5
+	assert(iscolor(a), "Cannot color mix non-color type.")
+	assert(iscolor(b), "Cannot color mix non-color type.")
+	local r = utils.lerp(a.r, b.r, percent)
+	local g = utils.lerp(a.g, b.g, percent)
+	local b = utils.lerp(a.b, b.b, percent)
+
+	return Color(r,g,b)
+end
 Color = utils.Color
+ColorMix = utils.ColorMix
+colormix = utils.ColorMix
 -- -------------------------------------------------------------------------- --
 --                                   String                                   --
 -- -------------------------------------------------------------------------- --
