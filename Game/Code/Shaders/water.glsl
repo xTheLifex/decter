@@ -6,9 +6,15 @@
 
 #define TAU 6.28318530718
 #define MAX_ITER 12
+#define SHORE 0.05
 extern number time = 0.0;
 extern number screenX;
 extern number screenY;
+
+float mid(float x, float a, float b)
+{
+	return clamp((x-a)/(b-a), 0,1);
+}
 
 vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
 {
@@ -28,6 +34,14 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
 	c = 1.17-pow(c, 1.4);
 	vec3 colour = vec3(pow(abs(c), 8.0));
     colour = clamp(colour + vec3(0.0, 0.35, 0.5), 0.0, 1.0);
-    
-	return vec4(colour, 0.55) * color;
+
+	vec4 result = vec4(colour, 0.55) * color;
+
+	// 0.73 to 0.71
+	if (uv.y < 0.73)
+	{
+		return mix(result , color * vec4(0.75,0.75,0.75,1), mid(uv.y, 0.73, 0.71));
+	}
+
+	return result;
 }

@@ -16,6 +16,7 @@ end)
 hooks.Add("OnGameDraw", function()
     hooks.Fire("OnDrawSky")
     hooks.Fire("OnDrawTerrain")
+    hooks.Fire("OnDrawUI")
 end)
 
 hooks.Add("OnGameUpdate", function()

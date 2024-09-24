@@ -7,7 +7,7 @@ terrain.water.color = Color(1,1,1)
 
 sky = sky or {}
 
-engine.rendering.newShader("water")
+engine.rendering.registerShader("water")
 
 hooks.Add("OnDrawTerrain", function ()
     local shader = engine.rendering.shaders["water"]

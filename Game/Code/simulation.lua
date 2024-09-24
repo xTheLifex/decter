@@ -1,6 +1,12 @@
 sim = {}
-sim.decter = {}
-sim.server = {}
+sim.cautionImage = love.graphics.newImage("Game/Assets/caution.png")
+local SCREEN_COLOR = Color(0.8,0.85,0.8)
+engine.rendering.registerShader("water")
+
+-- -------------------------------------------------------------------------- --
+--                               Water Condition                              --
+-- -------------------------------------------------------------------------- --
+
 sim.water = {}
 
 sim.water.condition = {
@@ -187,4 +193,216 @@ hooks.Add("OnGameDraw", function ()
     sim.water.condition["temperature"])
     love.graphics.setColor(1,1,1,1)
     love.graphics.print(text, 8, (ScreenY()/2))
+end)
+
+-- -------------------------------------------------------------------------- --
+--                                   Decter                                   --
+-- -------------------------------------------------------------------------- --
+
+sim.decter = {}
+sim.decter.display = true
+sim.decter.canvas = love.graphics.newCanvas(200, 150)
+sim.decter.font = love.graphics.newFont("Game/Assets/Fonts/PixelVerdana.ttf")
+sim.decter.status = "Inicializando..."
+sim.decter.timer = 0
+sim.decter.logs = {}
+
+hooks.Add("ClockMinutesPassed", function (passed)
+    -- Update decter status.
+    if sim.decter.timer > 0 then
+        sim.decter.timer = sim.decter.timer - passed
+        return
+    end
+
+    table.insert(sim.decter.logs, {
+        ["bacteria"] = sim.water.condition["bacteria"],
+        ["rads"] = sim.water.condition["rads"],
+        ["ph"] = sim.water.condition["ph"],
+        ["oxygen"] = sim.water.condition["oxygen"],
+        ["oil"] = sim.water.condition["oil"],
+        ["temperature"] = sim.water.condition["temperature"]
+    })
+
+    local text = string.format(
+    "Nível de Bacteria: %.1f\nRadiação: %.1f rads\nPH: %.1f\nOxigênio: %.1f\nOléo: %.1f\nTemperatura: %.1f C",
+    sim.water.condition["bacteria"],
+    sim.water.condition["rads"],
+    sim.water.condition["ph"],
+    sim.water.condition["oxygen"],
+    sim.water.condition["oil"],
+    sim.water.condition["temperature"])
+
+    sim.decter.status = text
+    sim.decter.timer = 5
+end)
+
+hooks.Add("OnDrawUI", function ()
+    if not sim.decter.status then return end
+    if not sim.decter.display then return end
+    local font = love.graphics.getFont() -- Save original font
+    love.graphics.setCanvas(sim.decter.canvas) -- Set to decter's display canvas.
+    -- --------------------------------- Canvas --------------------------------- --
+    love.graphics.clear() -- Clear the decter display canvas 
+    love.graphics.setColor(1,1,1,1) -- White color
+    love.graphics.rectangle("fill", 0,0, ScreenX(), ScreenY()) -- Draw background
+    love.graphics.setFont(sim.decter.font) -- Set display font
+    love.graphics.setColor(0,0,0,1) -- Black color
+    love.graphics.print(sim.decter.status, 0, 0, 0, 0.75, 0.75) -- Display text.
+    -- ------------------------------------ - ----------------------------------- --
+    love.graphics.setCanvas() -- Return to default rendering
+    love.graphics.setFont(font) -- Restore original font
+    love.graphics.setColor(0,0,0,1) -- Set color to black
+    love.graphics.rectangle("fill", 110, 128, 204, 154) -- Draw a black frame
+    love.graphics.setColor(SCREEN_COLOR) -- Screen Color
+    love.graphics.setShader(engine.rendering.getShader("screen")) -- Get screen shader
+    love.graphics.draw(sim.decter.canvas, 112, 130, 0) -- Draw the decter's UI canvas.
+    love.graphics.setShader() -- Clear shader.
+end)
+
+
+-- -------------------------------------------------------------------------- --
+--                                   Server                                   --
+-- -------------------------------------------------------------------------- --
+
+sim.server = {}
+sim.server.notices = {}
+sim.server.display = true
+sim.server.canvas = love.graphics.newCanvas(600,300)
+
+hooks.Add("ClockHoursPassed", function(passed)
+    -- Retrieve everything from decter and compile an average.
+    local total_bacteria = 0
+    local total_rads = 0
+    local total_ph = 0
+    local total_oxygen = 0
+    local total_oil = 0
+    local total_temperature = 0
+
+    for _, event in ipairs(sim.decter.logs) do
+        total_bacteria = total_bacteria + (event["bacteria"] or 0)
+        total_rads = total_rads + (event["rads"] or 0)
+        total_ph = total_ph + (event["ph"] or 0)
+        total_oxygen = total_oxygen + (event["oxygen"] or 0)
+        total_oil = total_oil + (event["oil"] or 0)
+        total_temperature = total_temperature + (event["temperature"] or 0)
+    end
+
+    local average_bacteria = math.floor(total_bacteria / #sim.decter.logs)
+    local average_rads = math.floor(total_rads / #sim.decter.logs)
+    local average_ph = math.floor(total_ph / #sim.decter.logs)
+    local average_oxygen = math.floor(total_oxygen / #sim.decter.logs)
+    local average_oil = math.floor(total_oil / #sim.decter.logs)
+    local average_temperature = math.floor(total_temperature / #sim.decter.logs)
+
+    -- Produce warnings
+
+    local icon = sim.cautionImage -- TODO: More icons
+    local clock = game.clock.get()
+
+    if (average_bacteria > 30) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Níveis de bacteria fora do esperado!",
+            ["icon"] = icon,
+            ["color"] = Color(1,0,1)
+        })
+    end
+    if (average_rads > 5) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Níveis de radiação excedem limite tolerável!",
+            ["icon"] = icon,
+            ["color"] = Color(0,1,0)
+        })
+    end
+    if (average_ph > 7.5) or (average_ph < 6.5) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Níveis de pH fora do esperado!",
+            ["icon"] = icon,
+            ["color"] = Color(0,0,1)
+        })
+    end
+    if (average_oxygen < 100) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Níveis de oxigênio fora do esperado!",
+            ["icon"] = icon,
+            ["color"] = Color(1,0,0)
+        })
+    end
+    if (average_oil > 15) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Foi detectado petroléo na água!",
+            ["icon"] = icon,
+            ["color"] = Color(0,1,1)
+        })
+    end
+    if (average_temperature > 30) or (average_temperature < 20) then
+        table.insert(sim.server.notices, {
+            ["clock"] = clock,
+            ["message"] = "Temperaturas fora do padrão esperado!",
+            ["icon"] = icon,
+            ["color"] = Color(1,1,0)
+        })
+    end
+
+    sim.decter.logs = {} -- Clear logs.
+
+    -- Trim the first 30 notices if the total exceeds 50
+    if #sim.server.notices > 50 then
+        for i = 1, 30 do
+            table.remove(sim.server.notices, 1) -- Remove the first (oldest) notice
+        end
+    end
+
+end)
+
+hooks.Add("OnDrawUI", function()
+    if not sim.server.display then return end
+    love.graphics.setCanvas(sim.server.canvas)
+    local font = love.graphics.getFont()
+    -- ------------------------------ Server Canvas ----------------------------- --
+    love.graphics.clear()
+    love.graphics.setColor(1,1,1,1)
+    love.graphics.rectangle("fill", 0,0, ScreenX(), ScreenY())
+    love.graphics.setFont(sim.decter.font)
+    -- Draw events in list of most recent
+    local height = 32
+
+    local numNotices = #sim.server.notices
+    for i=numNotices, 1, -1 do
+        local y = (numNotices - i) * height  -- This places the latest notice at the bottom
+        local notice = sim.server.notices[i]
+        if notice and notice.message then
+            -- Background
+            love.graphics.setColor(colormix(Color(1,1,1), notice.color, 0.25))
+            love.graphics.rectangle("fill", 0, y, 600, height)
+            love.graphics.setColor(1,1,1,1)
+            love.graphics.draw(notice.icon or sim.cautionImage, 0, y, 0, 0.05, 0.05)
+            love.graphics.setColor(0,0,0,1)
+            love.graphics.print(notice.message, 42, y, 0, 0.70)
+        end
+    end
+    
+    -- ------------------------------------ - ----------------------------------- --
+    love.graphics.setCanvas()
+    love.graphics.setFont(font)
+    love.graphics.setColor(0,0,0,1)
+    love.graphics.rectangle("fill", 873, 126, 604, 304)
+    love.graphics.setColor(SCREEN_COLOR) -- Screen Color
+    love.graphics.setShader(engine.rendering.getShader("screen")) -- Get screen shader
+    love.graphics.draw(sim.server.canvas, 875, 128)
+    love.graphics.setShader() -- Clear shader
+
+end)
+
+-- -------------------------------------------------------------------------- --
+--                                  Controls                                  --
+-- -------------------------------------------------------------------------- --
+
+hooks.Add("OnKeyPressed", function(key, scancode)
+    if (key == "z") then sim.decter.display = not sim.decter.display end
+    if (key == "x") then sim.server.display = not sim.server.display end
 end)

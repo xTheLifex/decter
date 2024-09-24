@@ -65,7 +65,7 @@ hooks.Add("OnEngineUpdate", function ()
 	end
 end)
 
-hooks.Add("OnEngineSetup", function()
+hooks.Add("PostGameLoad", function()
 	engine.rendering.reloadShaders()
 end)
 
