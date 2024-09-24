@@ -3,12 +3,22 @@ sim.cautionImage = love.graphics.newImage("Game/Assets/caution.png")
 local SCREEN_COLOR = Color(0.8,0.85,0.8)
 engine.rendering.registerShader("water")
 
--- -------------------------------------------------------------------------- --
---                               Water Condition                              --
--- -------------------------------------------------------------------------- --
+sim.decter = {}
+sim.decter.display = true
+sim.decter.canvas = love.graphics.newCanvas(200, 150)
+sim.decter.font = love.graphics.newFont("Game/Assets/Fonts/PixelVerdana.ttf")
+sim.decter.status = "Inicializando..."
+sim.decter.timer = 0
+sim.decter.logs = {}
+sim.decter.image = love.graphics.newImage("Game/Assets/decter.png")
+
+sim.server = {}
+sim.server.notices = {}
+sim.server.display = true
+sim.server.canvas = love.graphics.newCanvas(600,300)
+sim.server.image = love.graphics.newImage("Game/Assets/server.png")
 
 sim.water = {}
-
 sim.water.condition = {
     ["bacteria"] = 0,
     ["rads"] = 0,
@@ -17,13 +27,11 @@ sim.water.condition = {
     ["oil"] = 0,
     ["temperature"] = 25,
 }
-
 sim.water.nominal = table.deepCopy(sim.water.condition)
-
 -- Active events
 sim.water.events = {} 
 
--- Event definitions
+-- ---------------------------- Event Definitions --------------------------- --
 
 -- name = display name
 -- desc = display description
@@ -88,6 +96,20 @@ sim.events = {
         ["oxygen"] = 50,
     },
 }
+
+-- -------------------------------------------------------------------------- --
+--                              Drawing Apparatus                             --
+-- -------------------------------------------------------------------------- --
+
+hooks.Add("OnDrawApparratus", function ()
+    love.graphics.setColor(colormix(Color(0.75,0.75,0.75), sky.lastColor, 0.55))
+    love.graphics.draw(sim.decter.image, 200, 650, 0, 0.125, 0.125)
+    love.graphics.draw(sim.server.image, 1142, 462, 0, 0.25, 0.25)
+end)
+
+-- -------------------------------------------------------------------------- --
+--                               Water Condition                              --
+-- -------------------------------------------------------------------------- --
 
 local function TrySpawningEvents()
     -- 1% Chance of spawning an event.
@@ -199,14 +221,6 @@ end)
 --                                   Decter                                   --
 -- -------------------------------------------------------------------------- --
 
-sim.decter = {}
-sim.decter.display = true
-sim.decter.canvas = love.graphics.newCanvas(200, 150)
-sim.decter.font = love.graphics.newFont("Game/Assets/Fonts/PixelVerdana.ttf")
-sim.decter.status = "Inicializando..."
-sim.decter.timer = 0
-sim.decter.logs = {}
-
 hooks.Add("ClockMinutesPassed", function (passed)
     -- Update decter status.
     if sim.decter.timer > 0 then
@@ -263,11 +277,6 @@ end)
 -- -------------------------------------------------------------------------- --
 --                                   Server                                   --
 -- -------------------------------------------------------------------------- --
-
-sim.server = {}
-sim.server.notices = {}
-sim.server.display = true
-sim.server.canvas = love.graphics.newCanvas(600,300)
 
 hooks.Add("ClockHoursPassed", function(passed)
     -- Retrieve everything from decter and compile an average.
