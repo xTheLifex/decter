@@ -244,13 +244,14 @@ hooks.Add("OnGameUpdate", function(deltaTime)
 	end
 
 	game.clock.deltaClock = game.clock.diff(game.clock.lastTime, game.clock.get())
-	local deltaMilliseconds = game.clock.deltaClock["milliseconds"] or 0
-	local deltaSeconds = game.clock.deltaClock["seconds"] or 0
-	local deltaMinutes = game.clock.deltaClock["minutes"] or 0
-	local deltaHours = game.clock.deltaClock["hours"] or 0
-	local deltaDays = game.clock.deltaClock["days"] or 0
-	local deltaMonths = game.clock.deltaClock["months"] or 0
 	local deltaYears = game.clock.deltaClock["years"] or 0
+	local deltaMonths = (game.clock.deltaClock["months"] or 0) + (deltaYears * 12)
+	local deltaDays = (game.clock.deltaClock["days"] or 0) + (deltaMonths * getCurrentMonthLength())
+	local deltaHours = (game.clock.deltaClock["hours"] or 0) + (deltaDays * 24)
+	local deltaMinutes = (game.clock.deltaClock["minutes"] or 0) + (deltaHours * 60)
+	local deltaSeconds = (game.clock.deltaClock["seconds"] or 0) + (deltaMinutes * 60)
+	local deltaMilliseconds = (game.clock.deltaClock["milliseconds"] or 0) + (deltaSeconds * 1000)
+
 
 	if (deltaMilliseconds > 0) then
 		hooks.Fire("ClockMillisecondsPassed", deltaMilliseconds)
