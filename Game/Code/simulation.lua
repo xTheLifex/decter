@@ -15,7 +15,7 @@ sim.decter.image = love.graphics.newImage("Game/Assets/decter.png")
 sim.server = {}
 sim.server.notices = {}
 sim.server.display = true
-sim.server.canvas = love.graphics.newCanvas(600,300)
+sim.server.canvas = love.graphics.newCanvas(400,300)
 sim.server.image = love.graphics.newImage("Game/Assets/server.png")
 
 sim.water = {}
@@ -204,7 +204,7 @@ hooks.Add("ClockMinutesPassed", function (passed)
     TrySpawningEvents()
 end)
 
-hooks.Add("OnGameDraw", function ()
+hooks.Add("OnDrawUI", function ()
     local text = string.format(
     "Bacteria:%s\nRads:%s\nPH:%s\nOxygen:%s\nOil:%s\nTemperature:%s\n",
     sim.water.condition["bacteria"],
@@ -391,7 +391,7 @@ hooks.Add("OnDrawUI", function()
             love.graphics.setColor(1,1,1,1)
             love.graphics.draw(notice.icon or sim.cautionImage, 0, y, 0, 0.05, 0.05)
             love.graphics.setColor(0,0,0,1)
-            love.graphics.print(notice.message, 42, y, 0, 0.70)
+            love.graphics.print(notice.message, 42, y, 0, 0.90)
         end
     end
     
@@ -399,7 +399,7 @@ hooks.Add("OnDrawUI", function()
     love.graphics.setCanvas()
     love.graphics.setFont(font)
     love.graphics.setColor(0,0,0,1)
-    love.graphics.rectangle("fill", 873, 126, 604, 304)
+    love.graphics.rectangle("fill", 873, 126, 404, 304)
     love.graphics.setColor(SCREEN_COLOR) -- Screen Color
     love.graphics.setShader(engine.rendering.getShader("screen")) -- Get screen shader
     love.graphics.draw(sim.server.canvas, 875, 128)

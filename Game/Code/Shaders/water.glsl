@@ -37,10 +37,10 @@ vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords)
 
 	vec4 result = vec4(colour, 0.55) * color;
 
-	// 0.73 to 0.71
-	if (uv.y < 0.73)
+	
+	if (screen_coords.y < 530)
 	{
-		return mix(result , color * vec4(0.75,0.75,0.75,1), mid(uv.y, 0.73, 0.71));
+		return mix(result , color * vec4(0.75,0.75,0.75,1), mid(screen_coords.y, 530, 515));
 	}
 
 	return result;

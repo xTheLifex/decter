@@ -1,6 +1,6 @@
 terrain = {}
 terrain.water = {}
-terrain.water.min = {0, ScreenY() - 256}
+terrain.water.min = {0, 644}
 terrain.water.max = {ScreenX(),ScreenY()}
 terrain.land = love.graphics.newImage("Game/Assets/terrain.png")
 terrain.water.color = Color(1,1,1)

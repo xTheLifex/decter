@@ -14,10 +14,13 @@ hooks.Add("OnGameLoad", function ()
 end)
 
 hooks.Add("OnGameDraw", function()
+    love.graphics.push()
+    love.graphics.scale(ScreenX() / 1600, ScreenY() / 900)
     hooks.Fire("OnDrawSky")
     hooks.Fire("OnDrawTerrain")
     hooks.Fire("OnDrawApparratus")
     hooks.Fire("OnDrawUI")
+    love.graphics.pop()
 end)
 
 hooks.Add("OnGameUpdate", function()
